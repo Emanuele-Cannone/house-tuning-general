@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Vehicle;
+use App\Models\VehicleBrand;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class VehicleController extends Controller
+class VehicleBrandController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(): View
     {
-        return view('admin.vehicle.index');
+        return view('admin.vehicle-brand.index');
     }
 
     /**
@@ -36,7 +36,7 @@ class VehicleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Vehicle $vehicle)
+    public function show(VehicleBrand $vehicleBrand)
     {
         //
     }
@@ -44,7 +44,7 @@ class VehicleController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Vehicle $vehicle)
+    public function edit(VehicleBrand $vehicleBrand)
     {
         //
     }
@@ -52,7 +52,7 @@ class VehicleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Vehicle $vehicle)
+    public function update(Request $request, VehicleBrand $vehicleBrand)
     {
         //
     }
@@ -60,7 +60,7 @@ class VehicleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Vehicle $vehicle)
+    public function destroy(VehicleBrand $vehicleBrand)
     {
         //
     }

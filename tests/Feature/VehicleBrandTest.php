@@ -1,22 +1,24 @@
 <?php
 
 use App\Http\Requests\VehicleUpdateRequest;
+use App\Livewire\CreateVehicleBrandModal;
 use App\Livewire\CreateVehicleModal;
 use App\Livewire\VehicleTable;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Models\VehicleBrand;
 use App\Services\VehicleService;
 use Livewire\Livewire;
 
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
 
-test('vehicle create page is displayed', function () {
+test('vehicle-brand create page is displayed', function () {
     $user = User::factory()->create();
 
     $response = $this
         ->actingAs($user)
-        ->get('/vehicle/create');
+        ->get('/vehicle-brand/create');
 
     $response->assertOk();
 });
@@ -24,8 +26,8 @@ test('vehicle create page is displayed', function () {
 test('open and close modal', function () {
 
 
-    Livewire::test(CreateVehicleModal::class)
-        ->call('showCreateVehicleModal')
+    Livewire::test(CreateVehicleBrandModal::class)
+        ->call('showCreateVehicleBrandModal')
         ->assertSet('show', true)
         ->call('closeModal')
         ->assertSet('show', false);
@@ -33,35 +35,51 @@ test('open and close modal', function () {
 });
 
 
-test('create vehicle from modal', function () {
+test('create vehicle-brand from modal', function () {
 
+    $vehicle = Vehicle::factory()->create();
 
-    $name = fake()->word;
+    $name = fake()->unique()->word;
+    $brand = fake()->unique()->word;
 
-    Livewire::test(CreateVehicleModal::class)
-        ->call('showCreateVehicleModal')
+    Livewire::test(CreateVehicleBrandModal::class)
+        ->call('showCreateVehicleBrandModal')
         ->set('name', $name)
+        ->set('brand', $brand)
+        ->set('vehicle_id', $vehicle->id)
         ->call('create')
         ->assertDispatched('refreshTable')
         ->assertSet('show', false);
 
-    $this->assertDatabaseHas('vehicles', [
+    $this->assertDatabaseHas(VehicleBrand::class, [
         'id' => 1,
-        'name' => $name
+        'name' => $name,
+        'brand' => $brand,
+        'vehicle_id' => $vehicle->id,
     ]);
 
 });
 
-test('exception to create a non unique vehicle', function () {
+test('exception to create a non unique vehicle-brand', function () {
 
+    $vehicle = Vehicle::factory()->create();
 
-    Vehicle::create(['name' => 'Non-Unique Vehicle Name']);
+    VehicleBrand::create([
+        'name' => 'Non-Unique Vehicle Name',
+        'brand' => 'Non-Unique Vehicle Brand',
+        'vehicle_id' => $vehicle->id,
+    ]);
 
-    Livewire::test(CreateVehicleModal::class)
-        ->call('showCreateVehicleModal')
+    Livewire::test(CreateVehicleBrandModal::class)
+        ->call('showCreateVehicleBrandModal')
         ->set('name', 'Non-Unique Vehicle Name')
+        ->set('brand', 'Non-Unique Vehicle Brand')
+        ->set('vehicle_id', $vehicle->id)
         ->call('create')
-        ->assertHasErrors(['name' => 'unique']);
+        ->assertHasErrors([
+            'name' => 'unique',
+            'brand' => 'unique',
+        ]);
 
 });
 

@@ -121,7 +121,7 @@ class DatabaseSeeder extends Seeder
             Vehicle::create(['name' => $item]);
         });
 
-        /*
+
         $brands->each(function ($item) {
             VehicleBrand::create([
                 'vehicle_id' => $item['vehicle_id'],
@@ -129,6 +129,6 @@ class DatabaseSeeder extends Seeder
                 'name' => $item['name']
             ]);
         });
-        */
+
     }
 }

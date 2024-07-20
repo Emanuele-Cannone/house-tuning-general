@@ -46,21 +46,7 @@ class VehicleService
      */
     public function update(VehicleUpdateRequest $request, Vehicle $vehicle): void
     {
-        $validated = $request->validated();
-
-        try {
-            DB::beginTransaction();
-
-            $vehicle->update($validated);
-
-            DB::commit();
-
-        } catch (Exception $e) {
-
-            DB::rollBack();
-            Log::error('Error on update vehicle', [$e->getMessage()]);
-            throw new VehicleException();
-        }
+        //
     }
 
     public function destroy(Vehicle $vehicle): void

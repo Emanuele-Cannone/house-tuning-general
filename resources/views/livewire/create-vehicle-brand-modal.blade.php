@@ -1,5 +1,5 @@
 <div>
-    <button wire:click="$dispatch('showCreateVehicleModal')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Crea Nuovo Veicolo</button>
+    <button wire:click="$dispatch('showCreateVehicleBrandModal')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Crea Nuovo Veicolo</button>
 
     <div x-data="{ show: @entangle('show') }" x-cloak>
         <div x-show="show" class="fixed z-10 inset-0 overflow-y-auto">
@@ -22,6 +22,19 @@
                             <div class="mt-2">
                                 <input wire:model="name" type="text" placeholder="Nome del veicolo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                 @error('name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="mt-2">
+                                <input wire:model="brand" type="text" placeholder="Brand del veicolo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                @error('brand') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="mt-2">
+                                <select wire:model="vehicle_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <option value="" readonly>Seleziona un veicolo</option>
+                                    @foreach($vehicles as $vehicle)
+                                        <option value="{{ $vehicle->id }}">{{ $vehicle->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('selectedVehicle') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
                         </div>
                     </div>

@@ -4,12 +4,15 @@ namespace App\Livewire;
 
 use App\Exceptions\VehicleException;
 use App\Models\Vehicle;
+use App\Models\VehicleBrand;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
 use PowerComponents\LivewirePowerGrid\Exportable;
+use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Footer;
 use PowerComponents\LivewirePowerGrid\Header;
 use PowerComponents\LivewirePowerGrid\PowerGrid;
@@ -17,18 +20,21 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\Traits\WithExport;
 
-final class VehicleTable extends PowerGridComponent
+final class VehicleBrandTable extends PowerGridComponent
 {
     use WithExport;
 
-    public $listeners = [
-        'vehicleUpdated' => 'render',
-        'refreshTable' => 'render'
-    ];
-
     public array $name;
 
-    public bool $showErrorBag = true;
+    public array $brand;
+
+    public string $sortField = 'created_at';
+
+    public string $sortDirection = 'desc';
+
+    public $listeners = [
+        'refreshTable' => 'render'
+    ];
 
     public function setUp(): array
     {
@@ -38,9 +44,7 @@ final class VehicleTable extends PowerGridComponent
             Exportable::make('export')
                 ->striped()
                 ->type(Exportable::TYPE_XLS, Exportable::TYPE_CSV),
-
             Header::make()->showSearchInput(),
-
             Footer::make()
                 ->showPerPage()
                 ->showRecordCount(),
@@ -49,12 +53,16 @@ final class VehicleTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Vehicle::query();
+        return VehicleBrand::query()->with(['vehicle']);
     }
 
     public function relationSearch(): array
     {
-        return [];
+        return [
+            'vehicle' => [
+                'name',
+            ],
+        ];
     }
 
     public function fields(): PowerGridFields
@@ -62,7 +70,8 @@ final class VehicleTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('id')
             ->add('name')
-            ->add('active')
+            ->add('brand')
+            ->add('vehicle_name', fn(VehicleBrand $model) => e($model->vehicle->name))
             ->add('created_at');
     }
 
@@ -70,15 +79,18 @@ final class VehicleTable extends PowerGridComponent
     {
         return [
 
+            Column::make('Brand', 'brand')
+                ->editOnClick()
+                ->searchable()
+                ->sortable(),
+
             Column::make('Name', 'name')
                 ->sortable()
                 ->editOnClick()
                 ->searchable(),
 
-            Column::make('active', 'active')
-                ->toggleable()
-                ->sortable()
-                ->bodyAttribute('flex flex-col items-start mt-3'),
+            Column::make('Vehicle Name', 'vehicle_name')
+                ->searchable(),
 
             Column::action('Action')
         ];
@@ -87,48 +99,30 @@ final class VehicleTable extends PowerGridComponent
     public function filters(): array
     {
         return [
+            //
         ];
     }
 
 
-    public function actions(Vehicle $vehicle): array
+    public function actions(VehicleBrand $vehicleBrand): array
     {
         return [
             Button::add('delete')
                 ->slot('Elimina')
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch('showDeleteModal', ['model' => 'Vehicle', 'modelId' => $vehicle->id])
+                ->dispatch('showDeleteModal', ['model' => 'VehicleBrand', 'modelId' => $vehicleBrand->id])
         ];
     }
 
-    public function onUpdatedToggleable(string|int $id, string $field, string $value): void
-    {
-        try {
-            DB::beginTransaction();
-
-            Vehicle::query()->find($id)->update([
-                $field => e($value),
-            ]);
-
-            DB::commit();
-
-        } catch (\Exception $e) {
-
-            DB::rollBack();
-            Log::error('Error on update of vehicle', [$e->getMessage()]);
-            throw new VehicleException();
-
-        }
-
-        $this->skipRender();
-    }
 
 
-    protected function rules()
+
+    protected function rules(): array
     {
         return [
-            'name.*' => 'required|string:max:255|unique:vehicles,name',
+            'name.*' => 'required|string:max:255',
+            'brand.*' => 'required|string:max:255',
         ];
     }
 
@@ -137,48 +131,25 @@ final class VehicleTable extends PowerGridComponent
 
         $this->validate();
 
-        if($field === 'name'){
+        $vehicle = VehicleBrand::query()->find($id);
 
-            $vehicle = Vehicle::query()->find($id);
+        try {
+            DB::beginTransaction();
 
-            try {
-                DB::beginTransaction();
+            $vehicle->update([$field => $value]);
 
-                $vehicle->update(['name' => $value]);
+            noty()->success('Azione eseguita con successo!');
 
-                noty()->success('Azione eseguita con successo!');
+            DB::commit();
 
-                DB::commit();
-
-            } catch (\Exception $e) {
-                DB::rollBack();
-                Log::error('Error on update vehicle', [$e->getMessage()]);
-                throw new VehicleException();
-            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error on update vehicle brand', [$e->getMessage()]);
+            throw new VehicleException();
         }
 
-
-        /*
-        if ($field === 'price_in_eur') {
-            $field = 'price';
-
-            $value = (new \NumberFormatter('pt-PT', \NumberFormatter::CURRENCY))
-                ->parse(preg_replace('/\s+/', "\u{A0}", $value));
-        }
-
-        Icecream::query()->find($id)->update([
-            $field => e($value),
-        ]);
-
-        */
     }
 
-    protected function messages()
-    {
-        return [
-            'name.*.unique' => 'Nome veicolo già utilizzato.',
-        ];
-    }
 
     /*
     public function actionRules($row): array

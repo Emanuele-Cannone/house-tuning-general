@@ -18,6 +18,9 @@
                     <x-nav-link :href="route('vehicle.index')" :active="request()->routeIs('vehicle.index')">
                         @lang('vehicle.title')
                     </x-nav-link>
+                    <x-nav-link :href="route('vehicle-brand.index')" :active="request()->routeIs('vehicle-brand.index')">
+                        @lang('vehicle.brand.title')
+                    </x-nav-link>
                 </div>
             </div>
 
