@@ -15,4 +15,8 @@ return [
 
     'title' => 'Veicoli',
 
+    'brand' => [
+        'title' => 'Brand',
+    ]
+
 ];

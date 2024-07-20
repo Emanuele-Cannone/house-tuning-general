@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class DeleteModal extends Component
@@ -14,19 +15,19 @@ class DeleteModal extends Component
 
     protected $listeners = ['showDeleteModal', 'closeModal'];
 
-    public function showDeleteModal($model, $modelId)
+    public function showDeleteModal($model, $modelId): void
     {
         $this->model = $model;
         $this->modelId = $modelId;
         $this->show = true;
     }
 
-    public function closeModal()
+    public function closeModal(): void
     {
         $this->show = false;
     }
 
-    public function delete()
+    public function delete(): void
     {
         $modelClass = "App\\Models\\" . $this->model;
         $modelInstance = $modelClass::find($this->modelId);
@@ -40,7 +41,7 @@ class DeleteModal extends Component
 
             } catch (\Exception $e) {
 
-                dd($e->getMessage());
+                Log::error($e->getMessage());
             }
         }
 
